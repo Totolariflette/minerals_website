@@ -90,20 +90,20 @@ def choose_file():
 def upload_image():
     if 'file' not in request.files:
         flash('No file part')
-        return redirect(request.url)
+        return redirect(url_for('choose_file'))
     file = request.files['file']
     if file.filename == '':
         flash('No image selected for uploading')
-        return redirect(request.url)
+        return redirect(url_for('choose_file'))
 
     if file and file.filename.split('.')[-1] in supported_image_types:
         file.save(os.path.join(app.config['UPLOADED_PATH'], file.filename))
 
         flash('Image successfully uploaded and displayed below')
-        return render_template('choose_file.html', filename=file.filename)
+        return render_template('upload_image.html', filename=file.filename)
     else:
         flash('Allowed image types are - png, jpg, jpeg, gif')
-        return redirect(request.url)
+        return redirect(url_for('choose_file'))
 
 
 @app.route('/display/<filename>')

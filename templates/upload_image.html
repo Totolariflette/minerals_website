@@ -1,24 +1,23 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Base html</title>
+    <title>Upload and display image using Python Flask</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
 </head>
 <body>
 {% include 'navbar.html' %}
-<div class="container">
-    <p>
-    <h1>Hello, you are logged in !</h1>
-    </p>
-    <p style="margin-top: 2em">
-        <a class="btn btn-outline-success" href="{{ url_for('choose_file') }}" role="button">
-            Choose a file
-        </a>
 
-    </p>
+<div class="container">
+<p><h1>Your image is uploaded</h1></p>
+
+{% if filename %}
+    <div>
+        <img src="{{ url_for('display_image', filename=filename) }}">
+    </div>
+{% endif %}
 
 </div>
 
