@@ -1,26 +1,34 @@
 import os.path
 
-from flask import Flask, render_template, url_for, redirect, request
+from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_login import UserMixin, LoginManager, login_required, logout_user, current_user, login_user
 from flask_bcrypt import Bcrypt
-from flask_dropzone import Dropzone
 
 from models import db, User
 from forms import RegisterForm, LoginForm
 
+# Paths
 db_path = '../db/login.db'
-basedir = os.path.abspath(os.path.dirname(__file__))
+uploads_path = "static/uploads"
 
+# Constants
+basedir = os.path.abspath(os.path.dirname(__file__))
+supported_image_types = ['jpg', 'jpeg', "png"]
+
+# Init the app
 app = Flask(__name__)
 db.init_app(app)
+# Init the encryptor for the passwords
 bcrypt = Bcrypt(app)
+# Init the sqlite database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 app.config['SECRET_KEY'] = 'mykey'
 
-app.config.update(UPLOADED_PATH=os.path.join(basedir, 'uploads'), DROPZONE_MAX_FILE_SIZE=1024,
+# Init the dropzone in the main page
+app.config.update(UPLOADED_PATH=uploads_path, DROPZONE_MAX_FILE_SIZE=1024,
                   DROPZONE_TIMEOUT=5 * 60 * 1000)
-dropzone = Dropzone(app)
 
+# Init the login manager for the login session
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -72,12 +80,39 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route('/main', methods=['GET', 'POST'])
+@app.route('/choose_file', methods=['GET', 'POST'])
 @login_required
+def choose_file():
+    return render_template('choose_file.html')
+
+
+@app.route('/upload_image', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
+    file = request.files['file']
+    if file.filename == '':
+        flash('No image selected for uploading')
+        return redirect(request.url)
+
+    if file and file.filename.split('.')[-1] in supported_image_types:
+        file.save(os.path.join(app.config['UPLOADED_PATH'], file.filename))
+
+        flash('Image successfully uploaded and displayed below')
+        return render_template('choose_file.html', filename=file.filename)
+    else:
+        flash('Allowed image types are - png, jpg, jpeg, gif')
+        return redirect(request.url)
+
+
+@app.route('/display/<filename>')
+def display_image(filename):
+    return redirect(url_for('static', filename='uploads/' + filename), code=301)
+
+
+@app.route('/main')
 def main():
-    if request.method == 'POST':
-        f = request.files.get('file')
-        f.save(os.path.join(app.config['UPLOADED_PATH'], f.filename))
     return render_template('main.html')
 
 
