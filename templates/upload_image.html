@@ -1,28 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Upload and display image using Python Flask</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-</head>
-<body>
-{% include 'navbar.html' %}
-
 <div class="container">
-<p><h1>Your image is uploaded</h1></p>
+<div class="row">
 
-{% if filename %}
+<p>
+    <h5>If your image is heavy it might take some seconds</h5>
+    {% if display_image_filename %}
+    <p>
+        <a class="btn btn-outline-secondary" href="{{ url_for('choose_file') }}" role="button">
+            Select this image
+        </a>
+    </p>
+
     <div>
-        <img src="{{ url_for('display_image', filename=filename) }}">
+        {% print(file.filename) %}<br>
+        <img src="{{ url_for('display_image', filename=display_image_filename) }}">
     </div>
-{% endif %}
+    {% endif %}
+</p>
 
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
-        crossorigin="anonymous"></script>
-</body>
-</html>
+</div>

@@ -1,12 +1,18 @@
 import os.path
 
 from flask import Flask, render_template, url_for, redirect, request, flash
-from flask_login import UserMixin, LoginManager, login_required, logout_user, current_user, login_user
+from flask_login import LoginManager, login_required, logout_user, current_user, login_user
 from flask_bcrypt import Bcrypt
 
 from models import db, User
 from forms import RegisterForm, LoginForm
+from algos import save_file, save_heavy_file
 
+from PIL import Image
+from threading import Thread
+
+Image.MAX_IMAGE_PIXELS = None
+FLASK_DEBUG = 1
 # Paths
 db_path = '../db/login.db'
 uploads_path = "static/uploads"
@@ -87,6 +93,7 @@ def choose_file():
 
 
 @app.route('/upload_image', methods=['POST'])
+@login_required
 def upload_image():
     if 'file' not in request.files:
         flash('No file part')
@@ -97,21 +104,20 @@ def upload_image():
         return redirect(url_for('choose_file'))
 
     if file and file.filename.split('.')[-1] in supported_image_types:
-        file.save(os.path.join(app.config['UPLOADED_PATH'], file.filename))
-
-        flash('Image successfully uploaded and displayed below')
-        return render_template('upload_image.html', filename=file.filename)
+        display_image_filename = save_file(file)
+        return render_template('choose_file.html', display_image_filename=display_image_filename, file=file)
     else:
-        flash('Allowed image types are - png, jpg, jpeg, gif')
+        flash('Allowed image types are - png, jpg, jpeg')
         return redirect(url_for('choose_file'))
 
 
 @app.route('/display/<filename>')
 def display_image(filename):
-    return redirect(url_for('static', filename='uploads/' + filename), code=301)
+    return redirect(url_for('static', filename='uploads/' + filename))
 
 
 @app.route('/main')
+@login_required
 def main():
     return render_template('main.html')
 

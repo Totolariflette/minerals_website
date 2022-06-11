@@ -3,18 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Upload and display image using Python Flask</title>
+    <title>Select a file to upload</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
 </head>
 <body>
 {% include 'navbar.html' %}
 
-<p><h1>Upload and display image using Python Flask</h1></p>
+<p><h1>Upload and display image</h1></p>
 
 <div class="container">
 <div class="row">
-    <h2>Select a file to upload</h2>
     <p>
         {% with messages = get_flashed_messages() %}
           {% if messages %}
@@ -34,15 +33,12 @@
             </p>
         </dl>
         <p>
-            <input type="submit" value="Submit" class="btn btn-info">
+            <input type="submit" value="Upload" class="btn btn-info">
         </p>
     </form>
 
-    {% if filename %}
-        <div>
-            <img src="{{ url_for('display_image', filename=filename) }}">
-        </div>
-    {% endif %}
+    {% include 'upload_image.html' %}
+
 </div>
 </div>
 
