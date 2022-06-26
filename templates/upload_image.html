@@ -1,21 +1,23 @@
 <div class="container">
-<div class="row">
+    <div class="row">
 
-<p>
-    <h5>If your image is heavy it might take some seconds</h5>
-    {% if display_image_filename %}
-    <p>
-        <a class="btn btn-outline-secondary" href="{{ url_for('choose_file') }}" role="button">
-            Select this image
-        </a>
-    </p>
+        <p>
+        <h5>If your image is heavy it might take some seconds</h5>
+        {% if display_image_filename %}
+        <p>
+            <a class="btn btn-outline-secondary"
+               href="{{ url_for('select_model', display_image_filename=display_image_filename) }}"
+               role="button">
+                Select this image
+            </a>
+        </p>
 
-    <div>
-        {% print(file.filename) %}<br>
-        <img src="{{ url_for('display_image', filename=display_image_filename) }}">
+        <div>
+            {% print(filename) %}<br>
+            <img src="{{ url_for('display_image', filename=display_image_filename) }}">
+        </div>
+        {% endif %}
+        </p>
+
     </div>
-    {% endif %}
-</p>
-
-</div>
 </div>

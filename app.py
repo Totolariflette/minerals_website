@@ -6,7 +6,7 @@ from flask_bcrypt import Bcrypt
 
 from models import db, User
 from forms import RegisterForm, LoginForm
-from algos import save_file, save_heavy_file
+from algos import save_file, uploads_path, get_nns_directories_name
 
 from PIL import Image
 from threading import Thread
@@ -15,7 +15,6 @@ Image.MAX_IMAGE_PIXELS = None
 FLASK_DEBUG = 1
 # Paths
 db_path = '../db/login.db'
-uploads_path = "static/uploads"
 
 # Constants
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -92,20 +91,21 @@ def choose_file():
     return render_template('choose_file.html')
 
 
-@app.route('/upload_image', methods=['POST'])
+@app.route('/upload_image', methods=['GET', 'POST'])
 @login_required
 def upload_image():
     if 'file' not in request.files:
         flash('No file part')
         return redirect(url_for('choose_file'))
-    file = request.files['file']
-    if file.filename == '':
+    selected_file = request.files['file']
+    if selected_file.filename == '':
         flash('No image selected for uploading')
         return redirect(url_for('choose_file'))
 
-    if file and file.filename.split('.')[-1] in supported_image_types:
-        display_image_filename = save_file(file)
-        return render_template('choose_file.html', display_image_filename=display_image_filename, file=file)
+    if selected_file and selected_file.filename.split('.')[-1] in supported_image_types:
+        display_image_filename = save_file(selected_file)
+
+        return render_template('choose_file.html', display_image_filename=display_image_filename, filename=selected_file.filename)
     else:
         flash('Allowed image types are - png, jpg, jpeg')
         return redirect(url_for('choose_file'))
@@ -114,6 +114,13 @@ def upload_image():
 @app.route('/display/<filename>')
 def display_image(filename):
     return redirect(url_for('static', filename='uploads/' + filename))
+
+
+@app.route('/select_model/<display_image_filename>', methods=['GET', 'POST'])
+@login_required
+def select_model(display_image_filename):
+    nns_names = get_nns_directories_name()
+    return render_template('select_model.html', display_image_filename=display_image_filename, nns=nns_names)
 
 
 @app.route('/main')
