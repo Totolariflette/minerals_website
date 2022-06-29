@@ -6,7 +6,7 @@ from flask_bcrypt import Bcrypt
 
 from models import db, User
 from forms import RegisterForm, LoginForm
-from algos import save_file, uploads_path, get_nns_directories_name
+from algos import save_file, uploads_path, get_nns_directories_name, apply_nn_on_image
 
 from PIL import Image
 from threading import Thread
@@ -37,6 +37,8 @@ app.config.update(UPLOADED_PATH=uploads_path, DROPZONE_MAX_FILE_SIZE=1024,
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+original_uploaded_filename = ""
 
 
 @login_manager.user_loader
@@ -94,6 +96,7 @@ def choose_file():
 @app.route('/upload_image', methods=['GET', 'POST'])
 @login_required
 def upload_image():
+    global original_uploaded_filename
     if 'file' not in request.files:
         flash('No file part')
         return redirect(url_for('choose_file'))
@@ -103,9 +106,11 @@ def upload_image():
         return redirect(url_for('choose_file'))
 
     if selected_file and selected_file.filename.split('.')[-1] in supported_image_types:
+        original_uploaded_filename = selected_file.filename
         display_image_filename = save_file(selected_file)
 
-        return render_template('choose_file.html', display_image_filename=display_image_filename, filename=selected_file.filename)
+        return render_template('choose_file.html', display_image_filename=display_image_filename,
+                               filename=selected_file.filename)
     else:
         flash('Allowed image types are - png, jpg, jpeg')
         return redirect(url_for('choose_file'))
@@ -119,8 +124,18 @@ def display_image(filename):
 @app.route('/select_model/<display_image_filename>', methods=['GET', 'POST'])
 @login_required
 def select_model(display_image_filename):
-    nns_names = get_nns_directories_name()
-    return render_template('select_model.html', display_image_filename=display_image_filename, nns=nns_names)
+    return render_template('select_model.html', display_image_filename=display_image_filename,
+                           nns=get_nns_directories_name())
+
+
+@app.route('/apply_model/<nn>', methods=['GET', 'POST'])
+@login_required
+def apply_model(nn):
+    if original_uploaded_filename != "":
+        apply_nn_on_image(nn, original_uploaded_filename)
+        return render_template('apply_model.html')
+    else:
+        return redirect(url_for('choose_file'))
 
 
 @app.route('/main')

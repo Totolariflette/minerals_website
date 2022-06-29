@@ -3,3 +3,5 @@ Flask-WTF
 flask-login
 flask-sqlalchemy
 Pillow
+Tensorflow
+Keras
